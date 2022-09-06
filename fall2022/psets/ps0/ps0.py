@@ -31,12 +31,14 @@ class BTvertex:
 # Runtime: O(n)
 def calculate_sizes(v):
     
+    #First check to see if v is a valid vertex
     if v is None: 
         return 0
     
+    #If it is a valid vertex, recursively move down the right and left branches adding 1 every time 
+    #you encounter a valid vertex
     v.size = 1 + calculate_sizes(v.left) + calculate_sizes(v.right)
     return v.size
-    #Add comments later here!
     
     #Reasoning for why this solution is of O(n) complexity:
     #Big O calculates the time complexity in terms of the worst-case scenario. This solution has O(n)
@@ -56,21 +58,44 @@ def calculate_sizes(v):
 # Runtime: O(h)
 def find_vertex(r): 
     
-    #Through experimentation I have found that if the tree is balanced (i.e. both the right and left branches
-    #are of the same height and contain the same amount of nodes) then the vertex that would make the disjoint
-    #trees all of at most size n/2 is the root node
-    while r and r.right or r.left:
-        if r.right.size == r.left.size:
-            return r
-        #Else, we want to find the subtree that is deeper (i.e. higher) and move down it, setting the new r to be
-        #the vertext at which that subtree is rooted; here we assume it is the right subtree
-        elif r.right and r.right.size > r.left.size:
+    #First, let's define a variable to represent 'at most n/2 vertices'
+    maxSize = r.size/2
+
+    #Let's check for the validity of r
+    if r is None:
+        return 0
+
+    #Let's also check for the case that r is the only node 
+    if (r.right is None) and (r.left is None):
+        return r
+
+    #Now, assuming we have a tree of a height of at least 2
+    while r.right or r.left:
+        
+        #If both children of r exist
+        if r.right and r.left:
+
+            #If the tree is balanced
+            if (r.right.size <= maxSize) and (r.left.size <= maxSize):
+                return r
+            #If the tree is right-heavy
+            elif r.right.size > r.left.size:
+                r = r.right
+            #If the tree is left-heavy
+            else:
+                r = r.left
+        
+        #If right child exists, but no left
+        if r.right and (not r.left):
             r = r.right
-        #Here, we assume it is the left subtree
-        else:
+        
+        #If left child exists, but no right
+        if r.left and (not r.right):
             r = r.left
+    
     return r
-    #The reason we want to move down the deeper of the two subtrees is because removing the root vertex of the deeper
-    #of the two subtrees will result in disjoint trees that all have the size of at most n/2.
-    #Moving down the more shallow of the two subtrees and removing its root vertex will create at least one disjoint 
-    #tree that has a size greater than n/2; we do not want that.
+
+    #Reasoning for why this solution is O(h) complexity:
+    #This solution is O(h) complexity because in the worst-case scenario (when the height of 
+    #the tree is large), the algorithm will iteratively go through each height level,
+    #and at some point reach h, before it finds its needed vertex.

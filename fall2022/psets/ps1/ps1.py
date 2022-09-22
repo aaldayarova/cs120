@@ -76,3 +76,67 @@ def BC(n, b, k):
         raise ValueError()
     return digits
 
+def radixSort(univSize, base, array):
+    
+    arrayPrime = []
+    k = math.ceil(math.log2(univSize)/math.log2(base))
+
+    for i in range(len(array)):
+        arrayPrime[i][1] = BC(array[i], base, k)
+    
+    for j in range(k):
+        for i in range(len(array)):
+            arrayPrime[i][0] = arrayPrime[i][1][j]
+            newArray = countSort(base, [arrayPrime[i][0], [array[i][1], arrayPrime[i][1]]])
+    
+    for i in range(len(array)):
+        array[i][0] = sum(arrayPrime[i][1][j]*(base**(k-1)) for j in range(k))
+    
+    return array
+
+    # # Size of universe U in the new base
+    # k = math.ceil(math.log2(univSize)/math.log2(base))
+
+    # # Placeholder array which holds the values of V' and K' we'll compute later;
+    # # At this point arrayPrime looks like: arrayPrime = [[0,0], [0,0], [0,0]...] where each
+    # # array element holds a list of [K', V'] values 
+    
+    # # arrayPrime = []
+    # # for i in range(len(array)):
+    # #     arrayPrime[i] = [0,0]
+    # arrayPrime = [[0, 0] for _ in range(len(array))]
+    
+    # # For each element in our original array, we want our arrayPrime to hold base-change K in 
+    # # each of its V' values
+    # for i in range(len(array)):
+    #     arrayPrime[i][1] = BC(array[i][0], base, k)
+
+    # # For every column/digit
+    # for j in range(k):
+    #     # For every number
+    #     for i in range(len(array)):
+    #         # Store the column's/digit's value in K' 
+    #         arrayPrime[i][0] = arrayPrime[i][1][j]
+
+    #         # Sort the array by column/digit; output a sorted K-V pair list (the output of CountingSort)
+    #         # for l in range(len(array)):
+    #         #     countSortArray = countSort(base, [arrayPrime[l][0], [array[l][1], arrayPrime[l][1]]])
+    #         countSortArray = countSort(base, [[arrayPrime[i][0], [array[i][1], arrayPrime[i][1]]] for i in range(len(array))])
+    #         # Now, take the values from the output of Counting Sort and update the arrayPrime and array,
+    #         # after which you can move on to the next column/digit
+
+    #         for m in range(len(array)):
+    #             arrayPrime[m][0] = countSortArray[m][0]
+    #             array[m][1] = countSortArray[m][1][0]
+    #             arrayPrime[m][1] = countSortArray[m][1][1]
+    
+    # # Bring the K values back to their original base, which was base 10
+    # # for i in range(len(array)):
+    # #     # Check wether this section is correct
+    # #     for j in range(k):
+    # #         array[i][0] = sum((arrayPrime[i][1][k-1])*base**(k-1))
+    # for i in range(len(array)):
+    #     array[i][0] = sum([arrayPrime[i][1][j] * (base ** j) for j in range(k)])
+    
+    # # Return the array
+    # return array

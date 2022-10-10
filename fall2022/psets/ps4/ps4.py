@@ -31,13 +31,40 @@ returns: An key-value pair (Kj, Vj) such that Kj is an i’th smallest key.
 
 
 def QuickSelect(arr, i):
-    # Your code here
+    # Check to see if the array "arr" is of size 1 or less
+    if len(arr) <= 1:
+        return arr[0]
+    
+    # If not, continue with the below steps...
+    else:
+        # Generate a random number to serve as our pivot index in QuickSelect; this is where the "randomization" of this algorithm comes in
+        pivot = get_random_int(0, len(arr)-1)
 
-    # Feel free to use get_random_index(arr) or get_random_int(start_inclusive, end_inclusive)
-    # ... see the helper functions below
-    pass
-    return (0, -1)
+        # Find the key at the pivot index
+        key_at_pivot = arr[pivot]
 
+        # For every tuple in the list, we need to compare the tuple's key to the key at pivot index
+        for j in range(len(arr)):
+            # To store the comparisons, let's generate three empty arrays to store keys smaller than, equal to, and larger than the key_at_pivot value respectively
+            smaller = []
+            equal = []
+            larger = []
+
+            # Let's perform and store the comparisons
+            if arr[j] < key_at_pivot:
+                smaller.append(arr[j])
+            elif arr[j] == key_at_pivot:
+                equal.append(arr[j])
+            else:
+                larger.append(arr[j])
+        
+        # Now, let's compare the lengths of the generated arrays to the value of "i" given, and determine if we need to do another iteration of the above steps
+        if i < len(smaller):
+            QuickSelect(smaller, i)
+        elif i >= len(smaller + equal):
+            QuickSelect(larger, i-len(smaller + equal))
+        else:
+            return equal[0]
 
 '''
 Uses MergeSort to resolve a number of queries where each query is to find an key-value pair (Kj, Vj) such that Kj is an i’th smallest key.

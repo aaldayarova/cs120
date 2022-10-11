@@ -41,28 +41,30 @@ def QuickSelect(arr, i):
         pivot = get_random_int(0, len(arr)-1)
 
         # Find the key at the pivot index
-        key_at_pivot = arr[pivot]
+        key_at_pivot = arr[pivot][0]
 
         # For every tuple in the list, we need to compare the tuple's key to the key at pivot index
+        # To store the comparisons, let's generate three empty arrays to store keys smaller than, equal to, and larger than the key_at_pivot value respectively
+            
+        smaller = []
+        equal = []
+        larger = []
+        
         for j in range(len(arr)):
-            # To store the comparisons, let's generate three empty arrays to store keys smaller than, equal to, and larger than the key_at_pivot value respectively
-            smaller = []
-            equal = []
-            larger = []
 
             # Let's perform and store the comparisons
-            if arr[j] < key_at_pivot:
+            if arr[j][0] < key_at_pivot:
                 smaller.append(arr[j])
-            elif arr[j] == key_at_pivot:
+            elif arr[j][0] == key_at_pivot:
                 equal.append(arr[j])
             else:
                 larger.append(arr[j])
         
         # Now, let's compare the lengths of the generated arrays to the value of "i" given, and determine if we need to do another iteration of the above steps
         if i < len(smaller):
-            QuickSelect(smaller, i)
-        elif i >= len(smaller + equal):
-            QuickSelect(larger, i-len(smaller + equal))
+            return QuickSelect(smaller, i)
+        elif i >= (len(smaller) + len(equal)):
+            return QuickSelect(larger, i - (len(smaller) + len(equal)))
         else:
             return equal[0]
 
@@ -81,9 +83,15 @@ NOTE: This is different from the QuickSelect definition. This function takes in 
 def MergeSortSelect(arr, query_list):
     # Only call MergeSort once
     # ... MergeSort has already been implemented for you (see below)
-    pass
-    return [(0, -1)] * len(query_list)  # replace this line with your return
+    
+    merged_arr = MergeSort(arr)
+    result_arr = []
 
+    for j in range(len(query_list)):
+        element = query_list[j]
+        result_arr.append(merged_arr[element])
+    
+    return result_arr
 
 ##################################
 #                                #
@@ -94,7 +102,7 @@ def MergeSortSelect(arr, query_list):
 
 def experiments():
     # Edit this parameter
-    k = [1, 1, 1, 1, 1]
+    k = [1, 2, 3, 4, 5]
 
     # Feel free to edit these initial parameters
 

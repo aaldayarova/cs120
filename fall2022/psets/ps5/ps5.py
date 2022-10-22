@@ -4,7 +4,7 @@ from itertools import product, combinations
 Before you start: Read the README and the Graph implementation below.
 '''
 
-class Graph:
+class Graph: 
     '''
     A graph data structure with number of nodes N, list of sets of edges, and a list of color labels.
 
@@ -107,6 +107,12 @@ def exhaustive_search_coloring(G, k=3):
 
     When you're finished, check your work by running python3 -m ps5_color_tests 2.
 '''
+# Helper function to find a node that has not been visited yet (for choosing a start vertex in bfs_2_coloring)
+def find_unvisited(G, visited_set):
+    for node in range(G.N):
+        if node not in visited_set:
+            return node
+    return None
 
 # Given an instance of the Graph class G and a subset of precolored nodes,
 # Assigns precolored nodes to have color 2, and attempts to color the rest using colors 0 and 1.
@@ -127,11 +133,55 @@ def bfs_2_coloring(G, precolored_nodes=None):
         if len(precolored_nodes) == G.N:
             return G.colors
     
-    # TODO: Complete this function by implementing two-coloring using the colors 0 and 1.
-    # If there is no valid coloring, reset all the colors to None using G.reset_colors()
+    # While we still have unvisited nodes, continue coloring them
+    while len(visited) != G.N:
+
+        # Find a node that has not been visited yet; set it to be the starting vertex per pseudocode
+        # in lecture notes 11
+        start = find_unvisited(G, visited)
+
+        # Initialize the frontier to have the starting vertex in it
+        frontiers = [start]
+
+        # While we still have unvisited nodes AND we need to color them, let us separate them by edges
+        # and color as either color 1 or 0
+        while len(frontiers) != 0:
+
+            # Make a variable to keep track of the 0th frontier
+            current_frontier = frontiers[0]
+
+            # Find all the 1st-degree neighbors of the current_frontier (aka those that share an edge)
+            # Add them to the frontier list 
+            # This is going to be more relevant in a few chunks of code, when we move from the 0th frontier
+            # to the 1st
+            for edge_neighbor in G.edges[current_frontier]:
+                if edge_neighbor not in visited:
+                    frontiers.append(edge_neighbor)
+            
+            # Before we move onto the next frontier, however, we need to color the current_frontier the
+            # correct color (aka so that its color is unique from its neighbors)
+            for edge_neighbor in G.edges[current_frontier]:
+                if G.colors[edge_neighbor] == 0:
+                    G.colors[current_frontier] = 1
+                elif G.colors[edge_neighbor] == 1:
+                    G.colors[current_frontier] = 0
+            
+            # If after groing through the above loop the current_frontier is still not colored, that means
+            # its neighbors did not have a color, and we can just color the current_frontier whatever color
+            # we want
+            if not G.colors[current_frontier]:
+                G.colors[current_frontier] = 0
+
+            # We are done with this frontier, so now we can remove it from the queue and move to the next
+            frontiers.remove(current_frontier)
+            visited.add(current_frontier)
     
-    G.reset_colors()
-    return None
+    # Using the hint provided in the TO DO, let's conclude by checking the validity of the coloring
+    if G.is_graph_coloring_valid():
+        return G.colors
+    else:
+        G.reset_colors()
+        return None
 
 '''
     Part B: Implement is_independent_set.
@@ -140,10 +190,16 @@ def bfs_2_coloring(G, precolored_nodes=None):
 # Given an instance of the Graph class G and a subset of precolored nodes,
 # Checks if subset is an independent set in G 
 def is_independent_set(G, subset):
-    # TODO: Complete this function
+    # For every node in the subset...
+    for node in subset:
 
-    return True
-
+        # If its set of edges doesn't have any overlapping elements with the subset, then it's an ind. set!
+        if set(G.edges[node]).intersection(subset) == set():
+            return True
+        
+        # Else, it's not!
+        else:
+            return False
 '''
     Part C: Implement the 3-coloring algorithm from the sender receiver exercise.
     
@@ -168,8 +224,20 @@ def is_independent_set(G, subset):
 # If successful, modifies G.colors and returns the coloring.
 # If no coloring is possible, resets all of G's colors to None and returns None.
 def iset_bfs_3_coloring(G):
-    # TODO: Complete this function.
+    # Create subsets
+    for i in range(G.N//3+1):
+        for subset in combinations(range(G.N), i):
+            subset=list(subset)
 
+            # Searches for a 3-coloring
+            if is_independent_set(G, subset):
+
+                # Applies coloring
+                G.colors=bfs_2_coloring(G, subset)
+                if G.colors is not None:
+                    return G.colors
+
+    # If no coloring is possible
     G.reset_colors()
     return None
 

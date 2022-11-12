@@ -1,3 +1,5 @@
+# ps7.py
+
 from itertools import product, combinations
 from pysat.solvers import Glucose3
 
@@ -190,7 +192,22 @@ def iset_bfs_3_coloring(G):
 def sat_3_coloring(G):
     solver = Glucose3()
 
-    # TODO: Add the clauses to the solver
+    # For easier manipulation of numbers later in this for loop, start the vertex indexing with 1 not 0
+    for vertex in range(1, G.N+1):
+        
+        # Implement step 1 of the 3-coloring to SAT reduction algorithm (lecture 15):
+        # ensure every vertex in graph has a color (colors can be 1, 2, or 3); add these clauses to the solver
+        solver.add_clause([int(str(vertex)+"1"),int(str(vertex)+"2"),int(str(vertex)+"3")])
+
+        # Implement step 2 of the 3-coloring to SAT reduction algorithm (lecture 15):
+        # the endpoint vertices cannot be the same color
+        for edge in G.edges[vertex-1]:
+            
+            # For each of the 3 colors, make sure to check that endpoints are not colored the same color
+            solver.add_clause([-int(str(vertex)+"1"),-int(str(edge+1)+"1")])
+            solver.add_clause([-int(str(vertex)+"2"),-int(str(edge+1)+"2")])
+            solver.add_clause([-int(str(vertex)+"3"),-int(str(edge+1)+"3")])
+            # Note to self: might have to change the "edge+1" to be something else
 
     # Attempt to solve, return None if no solution possible
     if not solver.solve():
@@ -200,10 +217,27 @@ def sat_3_coloring(G):
     # Accesses the model in form [-v1, v2, -v3 ...], which denotes v1 = False, v2 = True, v3 = False, etc.
     solution = solver.get_model()
 
-    # TODO: If a solution is found, convert it into a coloring and update G.colors
+    # If a solution is found, convert it into a coloring and update G.colors
+    for literal in solution:
+        # If the literal in the model is not negated (e.g., v1)
+        if literal > 0:
+            
+            # Retrieve the color of the node embedded as the ones place of the double digit representation 
+            # (e.g., 11 -> color: 1, 12 -> color: 2, 13 -> color: 3)
+            color = (literal % 10)
+
+            # Retrieve the index of the node embedded as the tenths place of the double digit representation
+            # (e.g., 11 -> vertex: 1, 12 -> vertex: 1, 13 -> vertex: 1)
+            # (e.g., 21 -> vertex: 1, 22 -> vertex: 1, 23 -> vertex: 1)
+            # (e.g., 31 -> vertex: 1, 32 -> vertex: 1, 33 -> vertex: 1)
+            # etc.
+            # but, afterwards make sure to 0-index everything
+            vertex = (literal // 10) - 1
+
+            # Attach these calculated values (color and vertex index) to the given node
+            G.colors[vertex] = color
 
     return G.colors
-
 
 
 # Feel free to add miscellaneous tests below!
